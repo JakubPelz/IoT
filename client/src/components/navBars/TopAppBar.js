@@ -17,7 +17,17 @@ export default function MenuAppBar() {
         <NavLink to="/customer-info" className="item">
           <h4>Zákaznické prostředí</h4>
         </NavLink>
-        <NavLink to="/customer-info" className="item"></NavLink>
+        {user === null ? (
+          <div></div>
+        ) : user.payload.role === 'Admin' ? (
+          <NavLink to="/admin" className="item">
+            <h4>Administrator</h4>
+          </NavLink>
+        ) : (
+          <NavLink to="/user" className="item">
+            <h4>Klientská sekce</h4>
+          </NavLink>
+        )}
         <div className="right menu">
           <div className="ui item">
             {' '}

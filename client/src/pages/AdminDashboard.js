@@ -1,55 +1,40 @@
 import React, { useState } from 'react';
 
-import CreateUser from '../components/AdminDashboard/CreateUser';
-import ActiveUsers from '../components/AdminDashboard/ActiveUsers';
+import CreateUser from '../components/adminDashboard/CreateUser';
+import ActiveUsers from '../components/adminDashboard/ActiveUsers';
 import Profile from '../components/Profile/Profile';
+import Logout from '../components/logOut/Logout';
+
+import RightMenu from '../components/navBars/RightMenu';
+import MidContentDisplay from '../components/contentDisplay/MidContentDisplay';
 
 const AdminDashboard = () => {
   const [activeComponent, setActiveComponent] = useState(null);
-
-  function setActive() {
-    if (activeComponent === '1') {
-      return <ActiveUsers />;
-    }
-    if (activeComponent === '2') {
-      return <CreateUser />;
-    }
-    if (activeComponent === '3') {
-      return <Profile />;
-    }
-  }
+  const MenuData = [
+    'Aktivní úživatele',
+    'Přidat uživatele',
+    'Můj profil',
+    'Odhlásit se',
+  ];
+  const MidData = [<ActiveUsers />, <CreateUser />, <Profile />, <Logout />];
 
   return (
     <div className="ui middle aligned stackable grid container">
       <div className="row">
         <div className="five wide column" style={{ marginTop: '50px' }}>
           <div className="ui vertical pointing menu">
-            <a
-              className={`item ${activeComponent === '1' ? 'active' : ''}`}
-              onClick={() => setActiveComponent('1')}
-            >
-              Aktivní uživatele
-            </a>
-            <a
-              className={`item ${activeComponent === '2' ? 'active' : ''}`}
-              onClick={() => setActiveComponent('2')}
-            >
-              Přidat uživatele
-            </a>
-            <a
-              className={`item ${activeComponent === '3' ? 'active' : ''}`}
-              onClick={() => setActiveComponent('3')}
-            >
-              Muj profil
-            </a>
+            <RightMenu
+              MenuData={MenuData}
+              setActiveComponent={setActiveComponent}
+              activeComponent={activeComponent}
+            />
           </div>
         </div>
         <div className="/ten wide column">
-          {activeComponent === null ? (
-            <div>"Vítejte v administrativním rozhraní. "</div>
-          ) : (
-            <div>{setActive()}</div>
-          )}
+          <MidContentDisplay
+            MidData={MidData}
+            activeComponent={activeComponent}
+          />
         </div>
       </div>
     </div>
