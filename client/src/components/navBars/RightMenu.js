@@ -5,7 +5,7 @@ const RightMenu = ({ MenuData, setActiveComponent, activeComponent }) => {
     <>
       {MenuData.map((item, i) => {
         return (
-          <a
+          <div
             className={`item ${
               activeComponent === MenuData.indexOf(item) ? 'active' : ''
             }`}
@@ -13,7 +13,7 @@ const RightMenu = ({ MenuData, setActiveComponent, activeComponent }) => {
             key={i}
           >
             {item}
-          </a>
+          </div>
         );
       })}
     </>

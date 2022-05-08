@@ -22,6 +22,7 @@ const ActiveUsers = () => {
           setUsers(res.data);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -36,6 +37,7 @@ const ActiveUsers = () => {
                 <img
                   className="right floated mini ui image"
                   src="https://semantic-ui.com/images/avatar/large/elliot.jpg"
+                  alt="avatar"
                 />
                 <div className="header">{user.name}</div>
                 <div className="meta">{user.email}</div>

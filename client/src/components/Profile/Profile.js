@@ -13,6 +13,7 @@ const Profile = () => {
             <img
               className="right floated mini ui image"
               src="https://semantic-ui.com/images/avatar/large/elliot.jpg"
+              alt="avatar"
             />
             <div className="header">
               {user.payload.name} {user.payload.surname}
