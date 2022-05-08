@@ -11,6 +11,7 @@ const RightMenu = ({ MenuData, setActiveComponent, activeComponent }) => {
             }`}
             onClick={() => setActiveComponent(MenuData.indexOf(item))}
             key={i}
+            id="RightMenu"
           >
             {item}
           </div>

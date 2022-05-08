@@ -5,8 +5,8 @@ const MidContentDisplay = ({ MidData, activeComponent }) => {
     <>
       {MidData.filter(
         (component) => MidData.indexOf(component) === activeComponent
-      ).map((component) => {
-        return <div>{component}</div>;
+      ).map((component, i) => {
+        return <div key={i}>{component}</div>;
       })}
     </>
   );
