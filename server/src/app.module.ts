@@ -1,24 +1,26 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ItemsController } from './items/items.controller';
-import { ItemsModule } from './items/items.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UsersController } from './users/users.controller';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
-import { ArrayItemsModule } from './array-items/array-items.module';
-import config from './config/keys';
+import MongooseConfig from 'dataLayer/configuration/keys';
+import { AuthModule } from './modules/auth.module';
+import { GatewayModule } from './modules/gateway.module';
+import { UserModule } from './modules/user.module';
+import { WeatherDataModule } from './modules/weatherData.module';
+import { WorkspaceModule } from './modules/workspace.module';
+import { CommandModule } from 'nestjs-command';
+import { SeedCommand } from 'seed/seed.command';
+import { SharedModule } from 'modules/shared.module';
 
 @Module({
-  imports: [
-    ItemsModule,
-    MongooseModule.forRoot(config.mongoURI),
-    UsersModule,
-    AuthModule,
-    ArrayItemsModule,
-  ],
-  controllers: [AppController, ItemsController, UsersController],
-  providers: [AppService /* , { provide: APP_GUARD, useClass: RolesGuard } */],
+    imports: [
+        MongooseModule.forRoot(MongooseConfig.mongoURI),
+        SharedModule,
+        AuthModule,
+        UserModule,
+        WeatherDataModule,
+        WorkspaceModule,
+        GatewayModule,
+        CommandModule,
+    ],
+    providers: [SeedCommand],
 })
 export class AppModule {}

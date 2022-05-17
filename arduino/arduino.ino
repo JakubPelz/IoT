@@ -3,7 +3,7 @@
 dht DHT;
 
 #define DHT11_PIN 2
-#define DELAY 1000
+#define DELAY 5000
 
 unsigned long timestamp = 0;
 

@@ -43,12 +43,12 @@ const Login = () => {
 
     const submit = async (e) => {
         e.preventDefault();
-        const { userToken } = await ApiClient.login({
+        const authResponse = await ApiClient.login({
             username,
             password,
         });
 
-        let authTmp = { ...auth, userToken };
+        let authTmp = { ...auth, userToken: authResponse.data };
         ApiClient.getProfile(authTmp).then((res) => {
             setAuth({ ...authTmp, user: res.data });
             if (res.data.payload.role === "Admin") {
