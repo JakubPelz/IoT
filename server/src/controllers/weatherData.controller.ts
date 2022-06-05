@@ -6,35 +6,38 @@ import { TokenTypeGuard } from 'auth/guards/tokenType.guard';
 import { CookieHelper } from 'utils/cookieHelper';
 import { WeatherData } from 'dataLayer/entities/weatherData.entity';
 import { WeatherDataRepository } from 'dataLayer/repositories/weatherData.repository';
-import {
-    GetWeatherDataForWorkspaceResponse,
-    InsertWeatherDataDto as InsertWeatherDataDto,
-    InsertWeatherDataResponse,
-} from 'services/dto/weatherData.dto';
 import { WeatherDataService } from 'services/weatherData.service';
 import { GatewayService } from 'services/gateway.service';
+import { objectId } from 'utils/schemaHelper';
+import { ControllerBase } from './controllerBase';
+import {
+    GetWeatherDataForWorkspaceResponse,
+    InsertWeatherDataDto,
+    InsertWeatherDataResponse,
+} from 'services/dto/weatherData.dto';
+import { WorkspaceRepository } from 'dataLayer/repositories/workspace.repository';
+import { GatewayRepository } from 'dataLayer/repositories/gateway.repository';
 
-@UseGuards(JwtAuthGuard)
 @Controller('weather-data')
-export class WeatherDataController {
+@UseGuards(JwtAuthGuard, TokenTypeGuard)
+export class WeatherDataController extends ControllerBase {
     constructor(
         private readonly weatherDataRepository: WeatherDataRepository,
         private readonly weatherDataService: WeatherDataService,
+        private readonly gatewayRepository: GatewayRepository,
         private readonly gatewayService: GatewayService,
-        private readonly cookieHelper: CookieHelper
-    ) {}
+        workspaceRepository: WorkspaceRepository,
+        cookieHelper: CookieHelper
+    ) {
+        super(cookieHelper, workspaceRepository);
+    }
 
-    @UseGuards(TokenTypeGuard)
-    @EnforceTokenType(TokenType.User)
     @Get()
+    @EnforceTokenType(TokenType.User)
     async findAllForCurrentWorkspaceAsync(@Req() request): Promise<GetWeatherDataForWorkspaceResponse[]> {
-        const workspaceId = this.cookieHelper.getCurrentUserWorkspaceId(request);
-        if (!workspaceId) {
-            throw new BadRequestException('No workspace selected.');
-        }
+        const workspace = await this.getCurrentWorkspaceAsync(request);
 
-        const availableGateways = await this.gatewayService.getAllGatewaysForWorkspace(workspaceId);
-        console.log(availableGateways);
+        const availableGateways = await this.gatewayService.getAllGatewaysForWorkspace(workspace._id);
         const result: GetWeatherDataForWorkspaceResponse[] = [];
         for (const gateway of availableGateways) {
             result.push({
@@ -51,18 +54,21 @@ export class WeatherDataController {
         return result;
     }
 
-    @UseGuards(TokenTypeGuard)
-    @EnforceTokenType(TokenType.User)
     @Get('gateway/:gatewayId')
+    @EnforceTokenType(TokenType.User)
     findByGatewayIdAsync(@Param('gatewayId') gatewayId): Promise<WeatherData[]> {
         return this.weatherDataRepository.findAllByGatewayIdAsync(gatewayId);
     }
 
-    @UseGuards(TokenTypeGuard)
-    @EnforceTokenType(TokenType.Gateway)
     @Post()
+    @EnforceTokenType(TokenType.Gateway)
     async insertAsync(@Req() request, @Body() insertDto: InsertWeatherDataDto): Promise<InsertWeatherDataResponse> {
-        const count = await this.weatherDataService.insertAsync(request.user.gatewayId, insertDto);
+        const gateway = await this.gatewayRepository.findByIdAsync(objectId(request.user.gatewayId));
+        if (!gateway) {
+            throw new BadRequestException('Invalid gateway');
+        }
+
+        const count = await this.weatherDataService.insertAsync(gateway._id, insertDto);
         return {
             count,
         };

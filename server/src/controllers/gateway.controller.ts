@@ -1,48 +1,39 @@
-import {
-    BadRequestException,
-    Body,
-    Controller,
-    Get,
-    NotFoundException,
-    Param,
-    Post,
-    Req,
-    UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { TokenType } from 'auth/common/tokenType';
 import { EnforceTokenType } from 'auth/decorator/tokenType.decorator';
 import { JwtAuthGuard } from 'auth/guards/jwt.guard';
 import { TokenTypeGuard } from 'auth/guards/tokenType.guard';
 import { CookieHelper } from 'utils/cookieHelper';
-import { Gateway } from 'dataLayer/entities/Gateway.entity';
+import { Gateway } from 'dataLayer/entities/gateway.entity';
 import { GatewayRepository } from 'dataLayer/repositories/gateway.repository';
 import { CreateGatewayDto, CreateGatewayResult } from 'services/dto/gateway.dto';
 import { GatewayService } from 'services/gateway.service';
-import { foreignKey } from 'utils/schemaHelper';
+import { objectId } from 'utils/schemaHelper';
+import { ControllerBase } from './controllerBase';
+import { WorkspaceRepository } from 'dataLayer/repositories/workspace.repository';
 
+@Controller('gateway')
 @EnforceTokenType(TokenType.User)
 @UseGuards(JwtAuthGuard, TokenTypeGuard)
-@Controller('gateway')
-export class GatewayController {
+export class GatewayController extends ControllerBase {
     constructor(
         private readonly gatewayRepository: GatewayRepository,
         private readonly gatewayService: GatewayService,
-        private readonly cookieHelper: CookieHelper
-    ) {}
+        cookieHelper: CookieHelper,
+        workspaceRepository: WorkspaceRepository
+    ) {
+        super(cookieHelper, workspaceRepository);
+    }
 
     @Get()
     async findAllByWorkspaceAsync(@Req() request): Promise<Gateway[]> {
-        const workspaceId = this.cookieHelper.getCurrentUserWorkspaceId(request);
-        if (!workspaceId) {
-            throw new BadRequestException('No workspace selected.');
-        }
-
-        return this.gatewayService.getAllGatewaysForWorkspace(workspaceId);
+        const workspace = await this.getCurrentWorkspaceAsync(request);
+        return this.gatewayService.getAllGatewaysForWorkspace(workspace._id);
     }
 
     @Get(':id')
     async findByIdAsync(@Param('id') id: string): Promise<Gateway> {
-        const gateway = await this.gatewayRepository.findByIdAsync(foreignKey(id));
+        const gateway = await this.gatewayRepository.findByIdAsync(objectId(id));
         if (!gateway) {
             throw new NotFoundException();
         }
@@ -51,13 +42,9 @@ export class GatewayController {
     }
 
     @Post()
-    createAsync(@Req() request, @Body() createDto: CreateGatewayDto): Promise<CreateGatewayResult> {
-        const workspaceId = this.cookieHelper.getCurrentUserWorkspaceId(request);
-        if (!workspaceId) {
-            throw new BadRequestException('No workspace selected.');
-        }
+    async createAsync(@Req() request, @Body() createDto: CreateGatewayDto): Promise<CreateGatewayResult> {
+        const workspace = await this.getCurrentWorkspaceAsync(request);
         // TODO: check user authorization for the workspace
-
-        return this.gatewayService.createAsync(workspaceId, createDto);
+        return this.gatewayService.createAsync(workspace._id, createDto);
     }
 }
