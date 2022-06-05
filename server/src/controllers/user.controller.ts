@@ -5,10 +5,11 @@ import RoleGuard from 'auth/guards/roles.guard';
 import { UserRepository } from 'dataLayer/repositories/user.repository';
 import { CreateUserDto, UpdateUserDto } from 'services/dto/user.dto';
 import { User } from 'dataLayer/entities/user.entity';
-import { Role } from 'dataLayer/entities/enums/role.enum';
+import { UserRole } from 'dataLayer/entities/enums/role.enum';
 import { EnforceTokenType } from 'auth/decorator/tokenType.decorator';
 import { TokenType } from 'auth/common/tokenType';
 import { TokenTypeGuard } from 'auth/guards/tokenType.guard';
+import { UserRequest } from 'common/request';
 
 @Controller('users')
 @EnforceTokenType(TokenType.User)
@@ -16,15 +17,14 @@ import { TokenTypeGuard } from 'auth/guards/tokenType.guard';
 export class UserController {
     constructor(private readonly userRepository: UserRepository, private readonly userService: UserService) {}
 
-    @Get('profile')
-    getProfile(@Req() request) {
-        return request.user;
-    }
-
     @Get()
-    @UseGuards(RoleGuard(Role.Admin))
     findAll(): Promise<User[]> {
         return this.userRepository.findAllAsync();
+    }
+
+    @Get('profile')
+    getProfile(@Req() request: UserRequest<void>) {
+        return request.user;
     }
 
     @Get(':id')
